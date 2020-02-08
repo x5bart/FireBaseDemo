@@ -23,7 +23,7 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-   private fun signUpUser() {
+    private fun signUpUser() {
         if (etEMail.text.toString().isEmpty()) {
             etEMail.error = "Please enter valid email"
             etEMail.requestFocus()
@@ -41,19 +41,29 @@ class SignUpActivity : AppCompatActivity() {
             return
         }
 
-       auth.createUserWithEmailAndPassword(etEMail.text.toString(), etPassword.text.toString())
-           .addOnCompleteListener(this) { task ->
-               if (task.isSuccessful) {
-                   // Sign in success, update UI with the signed-in user's information
-                   startActivity(Intent(this,LoginActivity::class.java))
-                   finish()
-               } else {
-                   // If sign in fails, display a message to the user.
-                   Toast.makeText(baseContext, "Authentication failed. Try again after some time.",
-                       Toast.LENGTH_SHORT).show()
-               }
+        auth.createUserWithEmailAndPassword(etEMail.text.toString(), etPassword.text.toString())
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    val user = auth.currentUser
+                    user?.sendEmailVerification()
+                        ?.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                startActivity(Intent(this, LoginActivity::class.java))
+                                finish()
+                            }
+                        }
 
-               // ...
-           }
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Toast.makeText(
+                        baseContext, "Authentication failed. Try again after some time.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                // ...
+            }
     }
 }
